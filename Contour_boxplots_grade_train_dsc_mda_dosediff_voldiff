@@ -1,0 +1,294 @@
+
+
+#-------------------------
+# R Code for plot of boxdata from  multiple methods of contour generation (AI/DIR)
+#
+# Input:
+#  Excel data with self-reported grading and clinical relevance 
+#  Excel data with MSC and MDA
+#  Excel data with dose difference
+#  Excel data with volume difference
+#
+#
+# Output files:
+#
+#  Plots of data: MDA, DSC, Dose difference, Volume difference, Training, Clinical significance
+#
+# R code submitted as part of manuscript submitted
+# "AI compared to deformable image registration propagation techniques for contouring:" 
+# "feasibility and accuracy for head and neck replanning" 
+#
+# 
+#-------------------------
+
+install.packages('readxl')
+library("readxl")
+library(tidyverse)
+library(emmeans)
+
+setwd("/cloud/project/R /Rdata")
+
+UserTrain <- read_excel("Rdata_GradeF.xlsx")
+
+summary(UserTrain)
+
+UserTrain_Bef <- filter(UserTrain, Assessment=="Before Project")
+UserTrain_Aft <- filter(UserTrain, Assessment=="After Project")
+
+USerTrain_by_Asessment <- group_by(UserTrain,Assessment)
+summarise(USerTrain_by_Asessment,
+          mean(Training))
+
+
+UserTrain_Bef_by_csig <- group_by(UserTrain_Bef, ClinRel1)
+summarise(UserTrain_Bef_by_csig,
+          mean(Training))
+
+UserTrain_Aft_by_csig <- group_by(UserTrain_Aft, ClinRel1)
+summarise(UserTrain_Aft_by_csig,
+          mean(Training))
+
+UserTrain_by_cont <- group_by(UserTrain_Aft, Contour)
+UserTrain_by_cont <- arrange(UserTrain_by_cont, ClinRel1)
+
+summarise(UserTrain_by_cont,
+          mean(ClinRel1)) %>% print(n=Inf)
+
+str(UserTrain)
+
+  ggplot(data=UserTrain, mapping=aes(x=ClinRel2, y=Training, fill=Assessment)) +
+    stat_summary(fun.data=mean_sdl, geom="bar",position = position_dodge()) +
+    labs(title="RT Staff training based on contouring guideline", x="Clinical Significance", y="Training level") + 
+    stat_summary(fun.data=mean_cl_boot, geom="errorbar", width=0.9,position = position_dodge())+
+    coord_cartesian(ylim = c(1, 5)) +  # Draw plot
+    theme_classic()+
+    theme(text = element_text(size = 20))   
+
+  ggplot(data=UserTrain, mapping=aes(y=reorder(Contour,-ClinRel1), x=ClinRel1)) +
+    stat_summary(fun.data=mean_sdl, geom="bar",position = position_dodge()) +
+    labs(title="Contour clinical significance", x="Clinical significance rating", y="Contour") + 
+    stat_summary(fun.data=mean_cl_boot, geom="errorbar", width=0.9,position = position_dodge())+
+    coord_cartesian(xlim = c(1, 5)) +  # Draw plot
+    theme_classic()+
+    theme(text = element_text(size = 20))   
+    #theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+  
+  ggplot(data=UserTrain, mapping=aes(y=reorder(Contour,-ClinRel1), x=ClinRel1)) +
+    stat_summary(fun.data=mean_sdl, geom="bar",position = position_dodge()) +
+    labs(title="", x="Clinical significance rating", y="Contour") + 
+    stat_summary(fun.data=mean_cl_boot, geom="errorbar", width=0.9,position = position_dodge())+
+    coord_cartesian(xlim = c(1, 5)) +  # Draw plot
+    theme_classic()+
+    theme(text = element_text(size = 20))   
+  #theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+  
+      
+DLCManGrade <- read_excel("Rdata_GradeContourF.xlsx")
+
+summary(DLCManGrade)
+
+str(DLCManGrade)
+DLCManGrade_DLC <- filter(DLCManGrade, Method=="DLC")
+DLCManGrade_Man <-filter(DLCManGrade, Method=="Man")
+
+DLCManGrade_by_cont <- group_by(DLCManGrade_DLC, Contour)
+summarise(DLCManGrade_by_cont,
+          mean(Grade)) %>% print(n=Inf)
+
+DLCManGrade_by_cont <- group_by(DLCManGrade_Man, Contour)
+summarise(DLCManGrade_by_cont,
+          mean(Grade)) %>% print(n=Inf)
+
+
+ggplot(data=DLCManGrade, mapping=aes(x=reorder(Contour,Grade), y=Grade,fill=Method)) +
+  stat_summary(fun.data=mean_sdl, geom="bar",position = position_dodge()) +
+  labs(title="Contour clinical significance", y="Clinical significance rating") + 
+  stat_summary(fun.data=mean_cl_boot, geom="errorbar", width=0.9,position = position_dodge())+
+  coord_cartesian(ylim = c(1, 5)) +  # Draw plot
+  theme_classic()+
+  theme(text = element_text(size = 20))   
+#theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+
+ggplot(data=DLCManGrade, mapping=aes(x=reorder(Contour,Contour), y=Grade,fill=Method)) +
+  stat_summary(fun.data=mean_sdl, geom="bar",position = position_dodge()) +
+  labs(title="Contour grading of manual vs AI (DLC) contours", x="Contour",y="Contour grading score") + 
+  stat_summary(fun.data=mean_cl_boot, geom="errorbar", width=0.9,position = position_dodge())+
+  coord_cartesian(ylim = c(1, 5)) +  # Draw plot
+  theme_classic() +
+  geom_hline(yintercept = 2,linetype='dashed',col='grey')+
+  theme(text = element_text(size = 20)) 
+
+
+#theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+
+DSCMDA <- read_excel("Rdata_DSCMDAvF.xlsx")
+
+summary(DSCMDA)
+
+DSCMA_BrachP <- filter(DSCMDA,Contour=="BrachP")
+DSCMA_BrachP %>% 
+  group_by(Method) %>% 
+  summarise(mean(Dice[!Dice %in% res$out]),
+            mean(MDA[!MDA %in% res$out])) #calculate mean without outlier
+
+
+DSCMA_Brainstem <- filter(DSCMDA,Contour=="Brainstem")
+DSCMA_Brainstem %>% 
+  group_by(Method) %>% 
+  summarise(mean(Dice[!Dice %in% res$out]),
+            mean(HD[!HD %in% res$out]),
+            mean(MDA[!MDA %in% res$out])) #calculate mean without outlier
+
+
+DSCMA_Par <- filter(DSCMDA,Contour=="Parotid")
+DSCMA_Par %>% 
+  group_by(Method) %>% 
+  summarise(mean(Dice[!Dice %in% res$out]),
+            mean(HD[!HD %in% res$out]),
+            mean(MDA[!MDA %in% res$out])) #calculate mean without outlier
+
+DSCMA_coch <- filter(DSCMDA,Contour=="Cochlea")
+DSCMA_coch %>% 
+  group_by(Method) %>% 
+  summarise(mean(Dice[!Dice %in% res$out]),
+            mean(MDA[!MDA %in% res$out])) #calculate mean without outlier
+
+DSCMA_oralc <- filter(DSCMDA,Contour=="Oralcavity")
+DSCMA_oralc %>% 
+  group_by(Method) %>% 
+  summarise(mean(Dice[!Dice %in% res$out]),
+           mean(MDA[!MDA %in% res$out])) #calculate mean without outlier
+
+
+str(DSCMDA)
+
+ggplot(DSCMDA, aes(x=Contour,y=MDA, fill=Method))+
+  geom_boxplot()+
+  geom_hline(yintercept = 0,linetype='dashed',col='blue')+
+  geom_hline(yintercept = 2,linetype='dashed',col='green')+
+  #geom_hline(yintercept = 4,linetype='dashed',col='red')+
+  coord_cartesian(ylim = c(0, 16)) +  # Draw plot
+  labs(title="Mean distance to agreement (MDA)", x="Contour",y="MDA (mm)") + 
+  theme_classic() +
+  theme(text = element_text(size = 20))   
+
+  ggplot(DSCMDA, aes(x=Contour,y=HD, fill=Method))+
+  geom_boxplot()+
+  geom_hline(yintercept = 0,linetype='dashed',col='blue')+
+  geom_hline(yintercept = 10,linetype='dashed',col='green')+
+  #geom_hline(yintercept = 4,linetype='dashed',col='red')+
+    labs(title="Hausdorff distance (HD)", x="Contour",y="HD") + 
+  theme_classic()+
+  theme(text = element_text(size = 20))   
+
+ggplot(DSCMDA, aes(x=Contour,y=Dice, fill=Method))+
+  geom_boxplot()+
+  geom_hline(yintercept = 1.0,linetype='dashed',col='blue')+
+  geom_hline(yintercept = 0.7,linetype='dashed',col='green')+
+  #geom_hline(yintercept = 0.0,linetype='dashed',col='red')+
+  labs(title="Dice similarity coefficient (DSC)", x="Contour",y="DSC") + 
+  theme_classic()+
+  theme(text = element_text(size = 20))   
+
+
+Voldata <- read_excel("Rdata_VolumeF.xlsx")
+
+summary(Voldata)
+
+Voldata %>% 
+  group_by(Method) %>% 
+  summarise(mean_VD=mean(Volume_Diff), sd_VD=sd(Volume_Diff))
+
+Voldata_oralc <- filter(Voldata,Contour=="OralCavity")
+Voldata_oralc %>% 
+  group_by(Method) %>% 
+  summarise(mean(Volume_Diff[!Volume_Diff %in% res$out])) #calculate mean without outlier
+
+Voldata_mand <- filter(Voldata,Contour=="Mandible")
+Voldata_mand %>% 
+  group_by(Method) %>% 
+  summarise(mean(Volume_Diff[!Volume_Diff %in% res$out])) #calculate mean without outlier
+
+
+Voldata_bs <- filter(Voldata,Contour=="Brainstem")
+Voldata_bs %>% 
+  group_by(Method) %>% 
+  summarise(mean(Volume_Diff[!Volume_Diff %in% res$out])) #calculate mean without outlier
+
+
+Voldata_par <- filter(Voldata,Contour=="Parotid")
+Voldata_par %>% 
+  group_by(Method) %>% 
+  summarise(mean(Volume_Diff[!Volume_Diff %in% res$out])) #calculate mean without outlier
+
+
+
+Voldata_Veldmp <- filter(Voldata,Method=="2, VEL_DMP")
+Voldata_Veldmp %>% 
+  group_by(Contour) %>% 
+  summarise(mean(Volume_Diff))
+
+Voldata_AI <- filter(Voldata,Method=="6, DLC")
+Voldata_AI %>% 
+  group_by(Contour) %>% 
+  summarise(mean(Volume_Diff))
+
+
+str(Voldata)
+
+ggplot(Voldata, aes(x=Contour,y=Volume_Diff, fill=Method))+
+  geom_boxplot()+
+  geom_hline(yintercept = 0,linetype='dashed',col='blue')+
+  #geom_hline(yintercept = 5,linetype='dashed',col='green')+
+  #geom_hline(yintercept = 4,linetype='dashed',col='red')+
+  coord_cartesian(ylim = c(-70, 70)) +  # Draw plot
+  labs(title="Volume difference from manual contours", x="Contour",y="Volume difference (cc)") + 
+  theme_classic()+
+  theme(text = element_text(size = 20))   
+
+Dosedata <- read_excel("Rdata_DoseF.xlsx")
+
+summary(Dosedata)
+
+Dosedata %>% 
+  group_by(Method) %>% 
+  summarise(mean_DD=mean(Dose_Diff), sd_DD=sd(Dose_Diff))
+
+str(Dosedata)
+
+Dosdata_Veldmp <- filter(Dosedata,Method=="2, VEL_DMP")
+Dosdata_Veldmp %>% 
+  group_by(Contour) %>% 
+  summarise(mean(Dose_Diff[!Dose_Diff %in% res$out])) #calculate mean without outlier
+
+Dosdata_AI <- filter(Dosedata,Method=="6, DLC")
+Dosdata_AI %>% 
+  group_by(Contour) %>% 
+  summarise(mean(Dose_Diff[!Dose_Diff %in% res$out])) #calculate mean without outlier
+
+Dosdata_par <- filter(Dosedata,Contour=="Parotid")
+Dosdata_par %>% 
+  group_by(Method) %>% 
+  summarise(mean(Dose_Diff[!Dose_Diff %in% res$out])) #calculate mean without outlier
+
+Dosdata_oc <- filter(Dosedata,Contour=="OralCavity")
+Dosdata_oc %>% 
+  group_by(Method) %>% 
+  summarise(mean(Dose_Diff[!Dose_Diff %in% res$out])) #calculate mean without outlier
+
+Dosdata_bs <- filter(Dosedata,Contour=="Brainstem")
+Dosdata_bs %>% 
+  group_by(Method) %>% 
+  summarise(mean(Dose_Diff[!Dose_Diff %in% res$out])) #calculate mean without outlier
+
+ggplot(Dosedata, aes(x=Contour,y=Dose_Diff, fill=Method))+
+  geom_boxplot()+
+  geom_hline(yintercept = 0,linetype='dashed',col='blue')+
+  #geom_hline(yintercept = 5,linetype='dashed',col='green')+
+  #geom_hline(yintercept = 4,linetype='dashed',col='red')+
+  coord_cartesian(ylim = c(-20, 20)) +  # Draw plot
+  labs(title="Dose difference from manual contours", x="Contour",y="Dose difference (Gy)") + 
+  theme_classic()+
+  theme(text = element_text(size = 20))   
+
+
