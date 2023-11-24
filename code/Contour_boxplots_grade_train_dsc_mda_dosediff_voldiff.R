@@ -21,13 +21,11 @@
 # 
 #-------------------------
 
-install.packages('readxl')
-library("readxl")
+library(readxl)
 library(tidyverse)
 library(emmeans)
 
-setwd("/cloud/project/R /Rdata")
-
+setwd("../data")
 UserTrain <- read_excel("Rdata_GradeF.xlsx")
 
 summary(UserTrain)

@@ -25,17 +25,14 @@
 #-------------------------
 
 
-install.packages('readxl')
-library("readxl")
+library(readxl)
 library(tidyverse)
 library(emmeans)
-install.packages('glmmTMB')
 library(glmmTMB)
-install.packages('ggpubr')
 library(ggpubr)
 
 
-setwd("/cloud/project/R /Rdata")
+setwd("../data")
 
 #No statistical analysis of user training grade data
 
@@ -96,7 +93,7 @@ metric_predict <- emmip(metric_mod, ~ Method , CIs = TRUE, plotit = FALSE)
 
 ggplot(data = metric_predict, aes(Method, yvar) ) + 
   geom_point() + 
-  geom_errorbar(aes(ymin=LCL, ymax=UCL), width=0, size = 3, col = "lightgrey")+
+  geom_errorbar(aes(ymin=LCL, ymax=UCL), width=0, linewidth = 3, col = "lightgrey")+
   geom_point(aes(Method, Metric, color = Patient), data = contour_df) +
   ylab(metric)+
   theme_classic()
