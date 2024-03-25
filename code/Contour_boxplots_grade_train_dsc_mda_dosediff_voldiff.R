@@ -65,7 +65,10 @@ ContourGradeData_df <- as.data.frame(ContourGradeData_standardized)
 
 # Create the likert plot
 ContourGradeData_plot <- likert(ContourGradeData_df)
-plot(ContourGradeData_plot)  
+plot(ContourGradeData_plot)  #plot ordered according to grading data
+
+plot(ContourGradeData_plot, group.order=c("Orbit_Man","Orbit_DLC","Mandible_Man","Mandible_DLC","Cochlea_Man","Cochlea_DLC","Brainstem_Man","Brainstem_DLC","Parotid_Man","Parotid_DLC","BrachP_Man","BrachP_DLC","Oralcavity_Man","Oralcavity_DLC")) #plot ordered according to OAR manual then DLC for each OAR
+
       
 
 
