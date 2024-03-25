@@ -20,104 +20,54 @@
 #
 # 
 #-------------------------
-
-library(readxl)
 library(tidyverse)
 library(emmeans)
+library(hrbrthemes)
+library(viridis)
+library(likert)
+library(forcats)
+library(readxl)
 
-setwd("../data")
-UserTrain <- read_excel("Rdata_GradeF.xlsx")
+setwd("/cloud/project/R /Rdata")
 
-summary(UserTrain)
+ContourSigData <- read_excel("Rdata_ContourSigLikert.xlsx")
 
-UserTrain_Bef <- filter(UserTrain, Assessment=="Before Project")
-UserTrain_Aft <- filter(UserTrain, Assessment=="After Project")
+standardize_levelsContourSigData <- function(item_data) {
+  levels_orderContourSigData <- c("Never Relevant", "Rarely Relevant", "Sometimes Relevant", "Very Often Relevant", "Always Relevant")
+  factor(item_data, levels = levels_orderContourSigData)
+}
 
-USerTrain_by_Asessment <- group_by(UserTrain,Assessment)
-summarise(USerTrain_by_Asessment,
-          mean(Training))
+# Apply the standardize_levels function to each column in data2
+ContourSigData_standardized <- lapply(ContourSigData, standardize_levelsContourSigData)
+
+class(ContourSigData_standardized)
+ContourSigData_df <- as.data.frame(ContourSigData_standardized)
+
+# Create the likert plot
+ContourSigData_plot <- likert(ContourSigData_df)
+plot(ContourSigData_plot)
 
 
-UserTrain_Bef_by_csig <- group_by(UserTrain_Bef, ClinRel1)
-summarise(UserTrain_Bef_by_csig,
-          mean(Training))
-
-UserTrain_Aft_by_csig <- group_by(UserTrain_Aft, ClinRel1)
-summarise(UserTrain_Aft_by_csig,
-          mean(Training))
-
-UserTrain_by_cont <- group_by(UserTrain_Aft, Contour)
-UserTrain_by_cont <- arrange(UserTrain_by_cont, ClinRel1)
-
-summarise(UserTrain_by_cont,
-          mean(ClinRel1)) %>% print(n=Inf)
-
-str(UserTrain)
-
-  ggplot(data=UserTrain, mapping=aes(x=ClinRel2, y=Training, fill=Assessment)) +
-    stat_summary(fun.data=mean_sdl, geom="bar",position = position_dodge()) +
-    labs(title="RT Staff training based on contouring guideline", x="Clinical Significance", y="Training level") + 
-    stat_summary(fun.data=mean_cl_boot, geom="errorbar", width=0.9,position = position_dodge())+
-    coord_cartesian(ylim = c(1, 5)) +  # Draw plot
-    theme_classic()+
-    theme(text = element_text(size = 20))   
-
-  ggplot(data=UserTrain, mapping=aes(y=reorder(Contour,-ClinRel1), x=ClinRel1)) +
-    stat_summary(fun.data=mean_sdl, geom="bar",position = position_dodge()) +
-    labs(title="Contour clinical significance", x="Clinical significance rating", y="Contour") + 
-    stat_summary(fun.data=mean_cl_boot, geom="errorbar", width=0.9,position = position_dodge())+
-    coord_cartesian(xlim = c(1, 5)) +  # Draw plot
-    theme_classic()+
-    theme(text = element_text(size = 20))   
-    #theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
   
-  ggplot(data=UserTrain, mapping=aes(y=reorder(Contour,-ClinRel1), x=ClinRel1)) +
-    stat_summary(fun.data=mean_sdl, geom="bar",position = position_dodge()) +
-    labs(title="", x="Clinical significance rating", y="Contour") + 
-    stat_summary(fun.data=mean_cl_boot, geom="errorbar", width=0.9,position = position_dodge())+
-    coord_cartesian(xlim = c(1, 5)) +  # Draw plot
-    theme_classic()+
-    theme(text = element_text(size = 20))   
-  #theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
-  
+
+ContourGradeData <- read_excel("Rdata_ContourGrade_Likert.xlsx")
+
+standardize_levelsContourGradeData <- function(item_data) {
+  levels_order <- c("Grade 5", "Grade 4", "Grade 3", "Grade 2", "Grade 1")
+  factor(item_data, levels = levels_order)
+}
+
+# Apply the standardize_levels function to each column in data2
+ContourGradeData_standardized <- lapply(ContourGradeData, standardize_levelsContourGradeData)
+
+class(ContourGradeData_standardized)
+ContourGradeData_df <- as.data.frame(ContourGradeData_standardized)
+
+# Create the likert plot
+ContourGradeData_plot <- likert(ContourGradeData_df)
+plot(ContourGradeData_plot)  
       
-DLCManGrade <- read_excel("Rdata_GradeContourF.xlsx")
 
-summary(DLCManGrade)
-
-str(DLCManGrade)
-DLCManGrade_DLC <- filter(DLCManGrade, Method=="DLC")
-DLCManGrade_Man <-filter(DLCManGrade, Method=="Man")
-
-DLCManGrade_by_cont <- group_by(DLCManGrade_DLC, Contour)
-summarise(DLCManGrade_by_cont,
-          mean(Grade)) %>% print(n=Inf)
-
-DLCManGrade_by_cont <- group_by(DLCManGrade_Man, Contour)
-summarise(DLCManGrade_by_cont,
-          mean(Grade)) %>% print(n=Inf)
-
-
-ggplot(data=DLCManGrade, mapping=aes(x=reorder(Contour,Grade), y=Grade,fill=Method)) +
-  stat_summary(fun.data=mean_sdl, geom="bar",position = position_dodge()) +
-  labs(title="Contour clinical significance", y="Clinical significance rating") + 
-  stat_summary(fun.data=mean_cl_boot, geom="errorbar", width=0.9,position = position_dodge())+
-  coord_cartesian(ylim = c(1, 5)) +  # Draw plot
-  theme_classic()+
-  theme(text = element_text(size = 20))   
-#theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
-
-ggplot(data=DLCManGrade, mapping=aes(x=reorder(Contour,Contour), y=Grade,fill=Method)) +
-  stat_summary(fun.data=mean_sdl, geom="bar",position = position_dodge()) +
-  labs(title="Contour grading of manual vs AI (DLC) contours", x="Contour",y="Contour grading score") + 
-  stat_summary(fun.data=mean_cl_boot, geom="errorbar", width=0.9,position = position_dodge())+
-  coord_cartesian(ylim = c(1, 5)) +  # Draw plot
-  theme_classic() +
-  geom_hline(yintercept = 2,linetype='dashed',col='grey')+
-  theme(text = element_text(size = 20)) 
-
-
-#theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
 
 DSCMDA <- read_excel("Rdata_DSCMDAvF.xlsx")
 
@@ -168,17 +118,20 @@ ggplot(DSCMDA, aes(x=Contour,y=MDA, fill=Method))+
   coord_cartesian(ylim = c(0, 16)) +  # Draw plot
   labs(title="Mean distance to agreement (MDA)", x="Contour",y="MDA (mm)") + 
   theme_classic() +
-  theme(text = element_text(size = 20))   
+  theme(text = element_text(size = 20))    +
+  geom_jitter(width=0.25, alpha=0.15)
 
   ggplot(DSCMDA, aes(x=Contour,y=HD, fill=Method))+
-  geom_boxplot()+
-  geom_hline(yintercept = 0,linetype='dashed',col='blue')+
-  geom_hline(yintercept = 10,linetype='dashed',col='green')+
-  #geom_hline(yintercept = 4,linetype='dashed',col='red')+
-    labs(title="Hausdorff distance (HD)", x="Contour",y="HD") + 
-  theme_classic()+
-  theme(text = element_text(size = 20))   
-
+    geom_boxplot()+
+    geom_hline(yintercept = 0,linetype='dashed',col='blue')+
+    geom_hline(yintercept = 25,linetype='dashed',col='green')+
+    #geom_hline(yintercept = 4,linetype='dashed',col='red')+
+    coord_cartesian(ylim = c(0, 100)) +  # Draw plot
+    labs(title="Hausdorff distance (HD)", x="Contour",y="HD (mm)") + 
+    theme_classic() +
+    theme(text = element_text(size = 20))    +
+    geom_jitter(width=0.25, alpha=0.15)
+  
 ggplot(DSCMDA, aes(x=Contour,y=Dice, fill=Method))+
   geom_boxplot()+
   geom_hline(yintercept = 1.0,linetype='dashed',col='blue')+
@@ -186,10 +139,11 @@ ggplot(DSCMDA, aes(x=Contour,y=Dice, fill=Method))+
   #geom_hline(yintercept = 0.0,linetype='dashed',col='red')+
   labs(title="Dice similarity coefficient (DSC)", x="Contour",y="DSC") + 
   theme_classic()+
-  theme(text = element_text(size = 20))   
+  theme(text = element_text(size = 20))   +
+  geom_jitter(width=0.25, alpha=0.15)
 
 
-Voldata <- read_excel("Rdata_VolumeF.xlsx")
+Voldata <- read_excel("Rdata_VolumeF_ratio.xlsx")
 
 summary(Voldata)
 
@@ -236,15 +190,19 @@ str(Voldata)
 
 ggplot(Voldata, aes(x=Contour,y=Volume_Diff, fill=Method))+
   geom_boxplot()+
-  geom_hline(yintercept = 0,linetype='dashed',col='blue')+
-  #geom_hline(yintercept = 5,linetype='dashed',col='green')+
-  #geom_hline(yintercept = 4,linetype='dashed',col='red')+
-  coord_cartesian(ylim = c(-70, 70)) +  # Draw plot
-  labs(title="Volume difference from manual contours", x="Contour",y="Volume difference (cc)") + 
+  geom_hline(yintercept = 1.0,linetype='dashed',col='blue')+
+#  geom_hline(yintercept = 0.9,linetype='dashed',col='blue')+
+#  geom_hline(yintercept = 1.1,linetype='dashed',col='blue')+
+  geom_hline(yintercept = 0.8,linetype='dashed',col='green')+
+  geom_hline(yintercept = 1.2,linetype='dashed',col='green')+
+  coord_cartesian(ylim = c(0, 3)) +  # Draw plot
+  labs(title="Volume ratio from manual contours", x="Contour",y="Volume ratio") + 
   theme_classic()+
-  theme(text = element_text(size = 20))   
+  theme(text = element_text(size = 20))   +
+  geom_jitter(width=0.25, alpha=0.15)
 
-Dosedata <- read_excel("Rdata_DoseF.xlsx")
+
+Dosedata <- read_excel("Rdata_DoseF_doseratio.xlsx")
 
 summary(Dosedata)
 
@@ -279,14 +237,17 @@ Dosdata_bs %>%
   group_by(Method) %>% 
   summarise(mean(Dose_Diff[!Dose_Diff %in% res$out])) #calculate mean without outlier
 
+
 ggplot(Dosedata, aes(x=Contour,y=Dose_Diff, fill=Method))+
   geom_boxplot()+
-  geom_hline(yintercept = 0,linetype='dashed',col='blue')+
-  #geom_hline(yintercept = 5,linetype='dashed',col='green')+
-  #geom_hline(yintercept = 4,linetype='dashed',col='red')+
-  coord_cartesian(ylim = c(-20, 20)) +  # Draw plot
-  labs(title="Dose difference from manual contours", x="Contour",y="Dose difference (Gy)") + 
+  geom_hline(yintercept = 1,linetype='dashed',col='blue')+
+  geom_hline(yintercept = 0.9,linetype='dashed',col='green')+
+  geom_hline(yintercept = 1.1,linetype='dashed',col='green')+
+  coord_cartesian(ylim = c(0, 2)) +  # Draw plot
+  labs(title="Dose ratio from manual contours", x="Contour",y="Dose ratio") + 
   theme_classic()+
-  theme(text = element_text(size = 20))   
+  theme(text = element_text(size = 20))   +
+  geom_jitter(width=0.25, alpha=0.15)
+
 
 
