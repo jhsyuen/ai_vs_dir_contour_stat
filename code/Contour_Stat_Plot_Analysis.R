@@ -663,62 +663,51 @@ library(patchwork)
 plot2 <- plot(cont_par_mda,  xlab="(ii) Parotid MDA (mm)", ylab="") + 
   theme_classic() + 
   geom_vline(xintercept = 0) +
-  geom_vline(xintercept = -1.21,linetype='dashed',col='black')+
   theme(text = element_text(size = 14))   
 
 plot1 <- plot(cont_par_dsc,  xlab="(i) Parotid DSC", ylab="") + 
   theme_classic() + 
   geom_vline(xintercept = 0)+
-  geom_vline(xintercept = 0.17,linetype='dashed',col='black')+
   theme(text = element_text(size = 14))   
 
 plot3 <- plot(cont_par_hd,  xlab="(iii) Parotid HD (mm)", ylab="") + 
   theme_classic() + 
   geom_vline(xintercept = 0)+
-  geom_vline(xintercept = -7.18,linetype='dashed',col='black')+
   theme(text = element_text(size = 14))   
 
 plot4 <- plot(cont_par_vd,  xlab="(iv) Parotid Vol Diff (cc)", ylab="") + 
   theme_classic() + 
   geom_vline(xintercept = 0)+
-  geom_vline(xintercept = -0.32,linetype='dashed',col='black')+
   theme(text = element_text(size = 14))   
 
 plot5 <- plot(cont_par_dd,  xlab="(v) Parotid Dose Diff (Gy)", ylab="") + 
   theme_classic() + 
   geom_vline(xintercept = 0)+
-  geom_vline(xintercept = 0.35,linetype='dashed',col='black')+
   theme(text = element_text(size = 14))   
 
 plot7 <- plot(cont_bs_mda, xaxt = "n",  xlab="(vii) Brainstem MDA (mm)", ylab="") + 
   theme_classic() + 
   geom_vline(xintercept = 0)+
-  geom_vline(xintercept = -0.17,linetype='dashed',col='black')+
   theme(text = element_text(size = 14))   
 
 plot6 <- plot(cont_bs_dsc,  xlab="(vi) Brainstem DSC", ylab="") + 
   theme_classic() + 
   geom_vline(xintercept = 0)+
-  geom_vline(xintercept = 0.15,linetype='dashed',col='black')+
   theme(text = element_text(size = 14))   
 
 plot8 <- plot(cont_bs_hd,  xlab="(viii) Brainstem HD (mm)", ylab="") + 
   theme_classic() + 
   geom_vline(xintercept = 0)+
-  theme_classic() + 
-  geom_vline(xintercept = -7.5,linetype='dashed', col="black")+
   theme(text = element_text(size = 14))   
 
 plot9 <- plot(cont_bs_vd,  xlab="(ix) Brainstem Vol Diff (cc)", ylab="") + 
   theme_classic() + 
   geom_vline(xintercept = 0)+
-  geom_vline(xintercept = -1.43,linetype='dashed',col='black')+
   theme(text = element_text(size = 14))   
 
 plot10 <- plot(cont_bs_dd,  xlab="(x) Brainstem Dose Diff (Gy)", ylab="") + 
   theme_classic() + 
   geom_vline(xintercept = 0)+
-  geom_vline(xintercept = -1.37,linetype='dashed',col='black')+
   theme(text = element_text(size = 14))   
 
 
